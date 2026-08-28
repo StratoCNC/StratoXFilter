@@ -1,0 +1,249 @@
+<title>Качване в GitHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F7F9FB; --surface:#FFFFFF; --raise:#FbFcfd;
+  --ink:#182430; --muted:#586878; --faint:#8695A4;
+  --steel:#2E5077; --amber:#C0790F; --ok:#2E7D32; --danger:#B03A2E;
+  --border:#DCE3EA; --hair:#EBEFF3;
+  --shadow:0 1px 2px rgba(24,36,48,.05),0 8px 26px rgba(24,36,48,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0E151E; --surface:#141E29; --raise:#18232F;
+  --ink:#E7EDF3; --muted:#9DABBA; --faint:#6C7B8B;
+  --steel:#7AA2D0; --amber:#EDA53E; --ok:#7FC08A; --danger:#E4796B;
+  --border:#26323F; --hair:#1D2833;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --ground:#0E151E; --surface:#141E29; --raise:#18232F;
+  --ink:#E7EDF3; --muted:#9DABBA; --faint:#6C7B8B;
+  --steel:#7AA2D0; --amber:#EDA53E; --ok:#7FC08A; --danger:#E4796B;
+  --border:#26323F; --hair:#1D2833;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,Segoe UI,Roboto,sans-serif;
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.col{max-width:760px;margin-inline:auto;padding-inline:22px}
+a{color:var(--steel);text-underline-offset:2px}
+b,strong{font-weight:600}
+code{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--surface);
+  border:1px solid var(--hair);border-radius:5px;padding:.08em .4em}
+kbd{font-family:"IBM Plex Mono",monospace;font-size:.82em;background:var(--raise);
+  border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:.1em .45em;color:var(--ink)}
+
+header.bar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--ground) 88%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--hair)}
+.bar .row{display:flex;align-items:center;gap:10px;height:54px}
+.brand{display:flex;align-items:center;gap:9px;font-family:"IBM Plex Mono",monospace;
+  font-weight:600;font-size:14px}
+.brand .dot{width:20px;height:20px;border-radius:5px;background:var(--steel);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+
+.hero{border-bottom:1px solid var(--hair)}
+.hero .col{padding:40px 22px 26px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--steel)}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.1;letter-spacing:-.015em;font-weight:700;
+  text-wrap:balance;margin:.4em 0 .3em}
+.dek{font-size:18px;color:var(--muted);margin:0;max-width:58ch}
+
+section{padding-top:8px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:22px 0;border-top:1px solid var(--hair)}
+.num{width:44px;height:44px;border-radius:50%;background:var(--steel);color:#fff;font-weight:700;
+  font-size:19px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.step h2{font-size:21px;line-height:1.2;letter-spacing:-.01em;margin:.15em 0 .35em;text-wrap:balance}
+.step p{margin:0 0 .8em}
+.step ul,.step ol{margin:0 0 .9em;padding-left:1.25em}
+.step li{margin:.35em 0}
+.tip{font-size:14.5px;color:var(--muted)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;
+  box-shadow:var(--shadow);margin:6px 0 4px}
+.card h3{margin:.1em 0 .5em;font-size:16px}
+.gloss{display:grid;gap:8px;margin:0}
+.gloss div{display:grid;grid-template-columns:130px 1fr;gap:12px;font-size:15.5px;align-items:baseline}
+.gloss dt{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:var(--steel)}
+
+.note{border:1px solid var(--border);border-left:3px solid var(--steel);background:var(--surface);
+  border-radius:10px;padding:13px 15px;margin:.4em 0 1em;font-size:15.5px;box-shadow:var(--shadow)}
+.note.warn{border-left-color:var(--amber)} .note.stop{border-left-color:var(--danger)}
+.note .lab{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--steel);display:block;margin-bottom:3px}
+.note.warn .lab{color:var(--amber)} .note.stop .lab{color:var(--danger)}
+.note p{margin:.3em 0 0} .note p:first-of-type{margin-top:0}
+
+.ui{font-weight:600;color:var(--ink);white-space:nowrap}
+.ui::before{content:"❰ "} .ui::after{content:" ❱"}
+.ui::before,.ui::after{color:var(--faint);font-weight:400}
+
+footer{border-top:1px solid var(--hair);margin-top:8px}
+footer .col{padding:26px 22px 46px;color:var(--muted);font-size:14.5px}
+</style>
+
+<header class="bar"><div class="col row">
+  <span class="brand"><span class="dot">X</span>StratoXFilter</span>
+</div></header>
+
+<div class="hero"><div class="col">
+  <div class="eyebrow">Публикуване · за пълни начинаещи</div>
+  <h1>Качване на проекта в GitHub</h1>
+  <p class="dek">Стъпка по стъпка, с картинен интерфейс (без нито една команда в конзола). Дръж тази страница отворена и следвай точките една по една.</p>
+</div></div>
+
+<section><div class="col">
+
+  <div class="card">
+    <h3>Първо — 5 думи на прост език</h3>
+    <dl class="gloss">
+      <div><dt>GitHub</dt><dd>сайт, който пази проекти онлайн и дава на другите да ги свалят.</dd></div>
+      <div><dt>Repository</dt><dd>„repo" = папката на един проект, качена в GitHub.</dd></div>
+      <div><dt>Commit</dt><dd>запаметена снимка на файловете ти в даден момент.</dd></div>
+      <div><dt>Publish / Push</dt><dd>изпращане на файловете нагоре към GitHub.</dd></div>
+      <div><dt>GitHub&nbsp;Desktop</dt><dd>безплатно приложение, което прави всичко това с бутони.</dd></div>
+    </dl>
+    <p class="tip" style="margin:.6em 0 0">Ще ползваме <b>GitHub Desktop</b> — най-лесният път. Целият процес е ~20 минути веднъж.</p>
+  </div>
+
+  <div class="step">
+    <div class="num">1</div>
+    <div>
+      <h2>Направи си безплатен GitHub акаунт</h2>
+      <ul>
+        <li>Отвори <a href="https://github.com/signup">github.com/signup</a>.</li>
+        <li>Въведи имейл → парола → <b>username</b> (това е публично име, избери прилично, напр. <code>topurov</code> или подобно).</li>
+        <li>Потвърди имейла (GitHub праща код на пощата ти).</li>
+      </ul>
+      <p class="tip">Запиши си username-а и паролата — ще ти трябват след малко.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">2</div>
+    <div>
+      <h2>Провери какво НЯМА да се качва</h2>
+      <p>Вече съм сложил в проекта файл <code>.gitignore</code>, който автоматично <b>изключва</b>:</p>
+      <ul>
+        <li>папката с <b>старите чатове</b> (лично, не бива публично);</li>
+        <li>папката с <b>официалните UCCNC/UC300 мануали</b> (чужди авторски права — не се препубликуват);</li>
+        <li>служебния боклук (кеш, временни build файлове, тестови изходи, моите work-снимки).</li>
+      </ul>
+      <div class="note warn"><span class="lab">Ти реши за тези</span>
+        <p><b>DESCRIPTION MANUAL.pdf</b> (описанието на машината) и <b>axes measurment.xlsx</b> (суровите ти данни) — ако са твои и искаш да ги споделиш, остави ги; ако не — кажи ми и ще ги добавя към изключените. Официалните мануали НЕ ги качвай.</p>
+      </div>
+      <p class="tip">Нищо не изтриваш от диска — <code>.gitignore</code> само им казва „не отивайте в GitHub".</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">3</div>
+    <div>
+      <h2>Инсталирай GitHub Desktop</h2>
+      <ul>
+        <li>Отвори <a href="https://desktop.github.com">desktop.github.com</a> → <span class="ui">Download for Windows</span>.</li>
+        <li>Пусни свалилия се файл и изчакай да се инсталира (сам се отваря).</li>
+        <li>При първо стартиране → <span class="ui">Sign in to GitHub.com</span> → влез с акаунта от Стъпка 1 (браузърът ще те върне към приложението → <span class="ui">Authorize</span>).</li>
+        <li>Ако попита за име/имейл за commits — въведи каквото искаш (може същия username и имейл).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">4</div>
+    <div>
+      <h2>Направи проекта на repo</h2>
+      <ul>
+        <li>В GitHub Desktop: горе ляво <span class="ui">File</span> → <span class="ui">Add local repository…</span></li>
+        <li>Натисни <span class="ui">Choose…</span> и посочи папката:<br>
+          <code>C:\Users\topur\Desktop\StratoCNC X-Y FILTER</code></li>
+        <li>Ще каже, че тук още няма repo → кликни синия линк <span class="ui">create a repository</span>.</li>
+        <li>В прозореца: <b>Name</b> → напиши <code>StratoXFilter</code> (без интервали); <b>Description</b> (по избор). Полетата за Git ignore и License остави както са — вече ги имаш в папката. → <span class="ui">Create repository</span>.</li>
+      </ul>
+      <div class="note"><span class="lab">Какво стана</span><p>Папката ти вече е „repo" на твоя компютър. Още НЕ е онлайн — това е следващата стъпка.</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">5</div>
+    <div>
+      <h2>Направи първи commit (снимка на файловете)</h2>
+      <ul>
+        <li>Вляво виждаш списък с всички файлове, които ще влязат. <b>Провери</b>, че изключените ги НЯМА в списъка (папката със старите чатове и мануалите не бива да са там).</li>
+        <li>Долу ляво, в полето <span class="ui">Summary</span>, напиши напр. <code>Initial commit</code>.</li>
+        <li>Натисни синия бутон <span class="ui">Commit to main</span>.</li>
+      </ul>
+      <p class="tip">Ако изключен файл все пак се появи в списъка — кажи ми, ще оправим <code>.gitignore</code> преди да качваш.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">6</div>
+    <div>
+      <h2>Публикувай онлайн</h2>
+      <ul>
+        <li>Горе се появява бутон <span class="ui">Publish repository</span> → натисни го.</li>
+        <li>В прозорчето: <b>Name</b> = <code>StratoXFilter</code>, <b>Description</b> по избор.</li>
+        <li><b>Махни отметката</b> <span class="ui">Keep this code private</span> (за да е публично и хората да могат да го свалят).</li>
+        <li>→ <span class="ui">Publish repository</span>.</li>
+      </ul>
+      <div class="note"><span class="lab">Готово — вече е онлайн</span><p>Проектът ти живее на:<br><code>github.com/<b>твоя-username</b>/StratoXFilter</code><br>Това е линкът, който можеш да даваш на хората.</p></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">7</div>
+    <div>
+      <h2>Направи „Release" за exe-то (препоръчано)</h2>
+      <p>За да имат хората чист бутон <b>Download</b> за самото приложение:</p>
+      <ul>
+        <li>Отвори страницата на repo-то в браузър (в GitHub Desktop: <span class="ui">Repository</span> → <span class="ui">View on GitHub</span>).</li>
+        <li>Вдясно кликни <span class="ui">Releases</span> → <span class="ui">Create a new release</span> (или <span class="ui">Draft a new release</span>).</li>
+        <li><b>Choose a tag</b> → напиши <code>v1.0</code> → <span class="ui">Create new tag</span>.</li>
+        <li><b>Release title</b>: <code>StratoXFilter v1.0</code>. Кратко описание по избор.</li>
+        <li>Долу, в <span class="ui">Attach binaries…</span>, <b>завлечи</b> файла<br><code>dist\StratoXFilter.exe</code> — той се качва отделно.</li>
+        <li>→ <span class="ui">Publish release</span>.</li>
+      </ul>
+      <p class="tip">Сега на страницата на Release-а има директен линк за сваляне на exe-то — това слагаш като „download" линк във форум-поста.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">8</div>
+    <div>
+      <h2>Вземи си линковете за форум-поста</h2>
+      <ul>
+        <li><b>Проект / сорс:</b> <code>github.com/твоя-username/StratoXFilter</code></li>
+        <li><b>Сваляне (exe):</b> линкът от Release-а (Стъпка 7).</li>
+        <li><b>Статия:</b> публикуваната HTML статия — от нейната страница има меню за споделяне, което дава публичен линк.</li>
+      </ul>
+      <p>Тези три ги слагаш на местата <code>[DOWNLOAD_URL]</code> и <code>[ARTICLE_URL]</code> в <code>FORUM_POST.txt</code>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">9</div>
+    <div>
+      <h2>Как да обновяваш после (много лесно)</h2>
+      <p>Всеки път, щом промениш нещо в папката:</p>
+      <ol>
+        <li>Отвори GitHub Desktop — то само показва какво се е променило.</li>
+        <li>Напиши кратко <span class="ui">Summary</span> (напр. <code>Fix typo in README</code>).</li>
+        <li><span class="ui">Commit to main</span> → после горе <span class="ui">Push origin</span>.</li>
+      </ol>
+      <p class="tip">Това е целият цикъл. Commit = запази, Push = качи.</p>
+    </div>
+  </div>
+
+  <div class="note warn" style="margin-top:22px"><span class="lab">Дребно, но полезно да го знаеш</span>
+    <p>Когато някой свали <code>StratoXFilter.exe</code> и го пусне, Windows може да покаже синьо предупреждение <span class="ui">Windows protected your PC</span> (защото exe-то не е с платен цифров подпис). Нормално е за всяко ново приложение — казва се на хората: кликни <span class="ui">More info</span> → <span class="ui">Run anyway</span>. Добре е да го споменеш във форум-поста.</p>
+  </div>
+
+</div></section>
+
+<footer><div class="col">
+  Затъна ли някъде — кажи ми на коя стъпка и какво пише на екрана, и ще те отпуша. Успех с публикуването. 🚀
+</div></footer>

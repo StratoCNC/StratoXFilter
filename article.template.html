@@ -1,0 +1,438 @@
+<title>Mapping CNC Positioning Error</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F7F9FB; --grid:#E7EDF3; --surface:#FFFFFF; --plate:#FFFFFF;
+  --ink:#182430; --muted:#5B6B7B; --faint:#8695A4;
+  --steel:#2E5077; --steel-soft:#3D5A80; --amber:#C9791A; --amber-soft:#E0952A;
+  --danger:#B03A2E; --ok:#2E7D32;
+  --border:#DCE3EA; --hair:#E7EDF3;
+  --shadow:0 1px 2px rgba(24,36,48,.05), 0 8px 28px rgba(24,36,48,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E151E; --grid:#18222E; --surface:#141E29; --plate:#F4F6F8;
+    --ink:#E7EDF3; --muted:#9DABBA; --faint:#6C7B8B;
+    --steel:#7AA2D0; --steel-soft:#6E97C7; --amber:#F0B24E; --amber-soft:#E8A53C;
+    --danger:#E4796B; --ok:#7FC08A;
+    --border:#26323F; --hair:#1E2A36;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E151E; --grid:#18222E; --surface:#141E29; --plate:#F4F6F8;
+  --ink:#E7EDF3; --muted:#9DABBA; --faint:#6C7B8B;
+  --steel:#7AA2D0; --steel-soft:#6E97C7; --amber:#F0B24E; --amber-soft:#E8A53C;
+  --danger:#E4796B; --ok:#7FC08A;
+  --border:#26323F; --hair:#1E2A36;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-size:17px; line-height:1.62; letter-spacing:.005em;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:none}
+.col{max-width:720px; margin-inline:auto; padding-inline:22px}
+.bleed{max-width:920px; margin-inline:auto; padding-inline:22px}
+
+/* header */
+header.bar{
+  position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:saturate(1.1) blur(8px); border-bottom:1px solid var(--hair);
+}
+.bar .row{display:flex; align-items:center; gap:14px; height:56px}
+.brand{display:flex; align-items:center; gap:9px; font-family:"IBM Plex Mono",monospace;
+  font-weight:600; letter-spacing:.02em; font-size:14px; color:var(--ink); text-decoration:none}
+.brand .dot{width:20px;height:20px;border-radius:5px;background:var(--steel);
+  display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+.spacer{flex:1}
+.toggle{display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden}
+.toggle button{appearance:none; border:0; background:transparent; color:var(--muted);
+  font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; letter-spacing:.03em;
+  padding:6px 10px; cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--steel); color:#fff}
+.iconbtn{appearance:none; border:1px solid var(--border); background:transparent; color:var(--muted);
+  width:34px;height:34px;border-radius:8px;cursor:pointer; font-size:15px; display:inline-flex;
+  align-items:center;justify-content:center}
+.iconbtn:hover{color:var(--ink); border-color:var(--faint)}
+
+/* hero */
+.hero{position:relative; overflow:hidden; border-bottom:1px solid var(--hair)}
+.hero::before{content:""; position:absolute; inset:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:34px 34px; mask-image:linear-gradient(180deg,#000 0%,transparent 78%); opacity:.7}
+.hero .col{position:relative; padding-top:56px; padding-bottom:40px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--steel); display:flex; align-items:center; gap:8px}
+.eyebrow .num{color:var(--amber)}
+h1{font-size:clamp(30px,5.4vw,46px); line-height:1.08; letter-spacing:-.015em; font-weight:700;
+  text-wrap:balance; margin:.5em 0 .35em}
+.dek{font-size:19px; color:var(--muted); text-wrap:pretty; margin:0 0 22px; max-width:60ch}
+.meta{display:flex; flex-wrap:wrap; gap:8px 18px; font-family:"IBM Plex Mono",monospace;
+  font-size:12.5px; color:var(--faint); border-top:1px solid var(--hair); padding-top:16px}
+.meta b{color:var(--ink); font-weight:600}
+
+/* article */
+article{padding-top:14px; padding-bottom:40px}
+section{padding-top:26px}
+h2{font-size:clamp(21px,3.2vw,27px); line-height:1.18; letter-spacing:-.01em; font-weight:700;
+  text-wrap:balance; margin:.2em 0 .5em}
+h3{font-size:17px; font-weight:600; margin:1.4em 0 .3em; color:var(--ink)}
+p{margin:0 0 1.05em}
+a{color:var(--steel); text-underline-offset:2px}
+strong{font-weight:600}
+ul,ol{margin:0 0 1.1em; padding-left:1.25em}
+li{margin:.3em 0}
+.lead{font-size:18.5px}
+
+.sec-head{display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--hair); padding-top:22px}
+.sec-head .k{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--amber);
+  min-width:26px}
+
+/* callouts */
+.note{border:1px solid var(--border); border-left:3px solid var(--steel); background:var(--surface);
+  border-radius:10px; padding:14px 16px; margin:0 0 1.2em; font-size:15.5px; box-shadow:var(--shadow)}
+.note.warn{border-left-color:var(--amber)}
+.note.stop{border-left-color:var(--danger)}
+.note .lab{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--steel); display:block; margin-bottom:4px}
+.note.warn .lab{color:var(--amber)} .note.stop .lab{color:var(--danger)}
+.note p:last-child{margin-bottom:0}
+
+/* table */
+.tablewrap{overflow-x:auto; margin:0 0 1.2em; border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; font-size:15px}
+caption{caption-side:bottom; text-align:left; padding:8px 14px; color:var(--faint);
+  font-family:"IBM Plex Mono",monospace; font-size:12px}
+th,td{padding:9px 14px; text-align:left; border-bottom:1px solid var(--hair); font-variant-numeric:tabular-nums}
+thead th{background:var(--surface); font-family:"IBM Plex Mono",monospace; font-size:12px;
+  font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--muted)}
+tbody tr:last-child td{border-bottom:0}
+td.neg{color:var(--danger)} td.pos{color:var(--ok)}
+
+/* figures */
+figure{margin:1.6em 0}
+.plate{background:var(--plate); border:1px solid var(--border); border-radius:12px; padding:14px;
+  box-shadow:var(--shadow)}
+.plate img{display:block; width:100%; height:auto; border-radius:6px}
+figcaption{font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--muted);
+  margin-top:10px; padding-left:2px}
+figcaption b{color:var(--steel); font-weight:600}
+
+/* pullquote */
+.pull{font-size:clamp(20px,3.4vw,25px); line-height:1.3; font-weight:600; letter-spacing:-.01em;
+  color:var(--ink); text-wrap:balance; border-left:3px solid var(--amber); padding:2px 0 2px 20px; margin:1.5em 0}
+
+/* code */
+code{font-family:"IBM Plex Mono",monospace; font-size:.88em; background:var(--surface);
+  border:1px solid var(--hair); border-radius:5px; padding:.08em .38em}
+pre{overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:14px 16px; margin:0 0 1.2em; box-shadow:var(--shadow)}
+pre code{background:none; border:0; padding:0; font-size:13px; line-height:1.6}
+
+/* footer / cta */
+footer{border-top:1px solid var(--hair); background:var(--surface); margin-top:20px}
+footer .col{padding-top:30px; padding-bottom:44px}
+.cta{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:6px 0 18px}
+.pill{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; letter-spacing:.03em;
+  border:1px solid var(--border); border-radius:999px; padding:7px 13px; color:var(--muted)}
+.pill.key{background:var(--amber); color:#241a09; border-color:transparent}
+.foot-note{font-size:13.5px; color:var(--faint)}
+.lang-bg{display:none}
+body[data-lang="bg"] .lang-en{display:none}
+body[data-lang="bg"] .lang-bg{display:block}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<header class="bar">
+  <div class="col row">
+    <a class="brand" href="#top"><span class="dot">X</span>StratoXFilter</a>
+    <span class="spacer"></span>
+    <div class="toggle" role="group" aria-label="Language">
+      <button id="en" aria-pressed="true">EN</button>
+      <button id="bg" aria-pressed="false">BG</button>
+    </div>
+    <button class="iconbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<a id="top"></a>
+<div class="hero">
+  <div class="col">
+    <div class="eyebrow lang-en"><span class="num">CNC</span> Accuracy · Metrology · Open source</div>
+    <div class="eyebrow lang-bg"><span class="num">CNC</span> Точност · Метрология · Отворен код</div>
+    <h1 class="lang-en">The hidden nonlinear positioning error — and how to cancel it</h1>
+    <h1 class="lang-bg">Скритата нелинейна позиционна грешка — и как да я премахнеш</h1>
+    <p class="dek lang-en">Backlash compensation and steps-per-mm won't touch it. Here's how to diagnose the smooth, direction-dependent error most CNC machines carry — measure it, map it, and correct the G-code with a free tool.</p>
+    <p class="dek lang-bg">Backlash компенсацията и стъпки-на-мм не я хващат. Ето как да диагностицираш плавната, посочно-зависима грешка на повечето CNC машини — измери я, картографирай я и коригирай G-кода с безплатен инструмент.</p>
+    <div class="meta">
+      <span class="lang-en"><b>Tool:</b> StratoXFilter</span><span class="lang-bg"><b>Инструмент:</b> StratoXFilter</span>
+      <span class="lang-en"><b>License:</b> MIT</span><span class="lang-bg"><b>Лиценз:</b> MIT</span>
+      <span class="lang-en"><b>Axes:</b> X · Y · Z</span><span class="lang-bg"><b>Оси:</b> X · Y · Z</span>
+      <span><b>Author:</b> Ivan Topurov</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= ENGLISH ============================= -->
+<article class="lang-en">
+  <div class="col">
+    <p class="lead">You calibrated steps-per-mm. You dialled in backlash compensation. Homing repeats beautifully. And yet an 800&nbsp;mm feature comes out 799.8, an 1100&nbsp;mm one comes out 1101.2, and a bore that should be dead round is subtly egg-shaped.</p>
+    <p>The error isn't constant, it isn't proportional to distance, and it seems to change depending on which way the axis was moving. This is <strong>nonlinear, position-dependent positioning error</strong> — the thing that sits underneath backlash and scale error and quietly limits the accuracy of a huge number of hobby and semi-pro machines, especially rack-and-pinion gantries.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">01</span><h2>The problem nobody talks about</h2></div>
+    <p>It comes from real, boring physical things: a rack that isn't perfectly straight or parallel to the rails (mesh depth drifts, so effective pitch radius drifts); pinion runout and a once-per-revolution ripple; gantry misalignment, frame flex, thermal drift; gearbox geometry.</p>
+    <p>Mapped along a 1.5&nbsp;m axis, it typically looks like a <strong>smooth arch plus a small periodic ripple</strong>. Three properties make it nasty:</p>
+    <ul>
+      <li><strong>It's not linear.</strong> Steps-per-mm (or servo E-gear) only fixes a constant scale factor. After that, the arch remains.</li>
+      <li><strong>It's not backlash.</strong> Backlash is lost motion <em>at a reversal</em>. This error is present while moving monotonically, and varies with <em>position</em>.</li>
+      <li><strong>It's often direction-dependent.</strong> Left-to-right and right-to-left trace <em>different</em> curves — on my machine up to ~0.9&nbsp;mm apart.</li>
+    </ul>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_MAP}}" alt="Two correction curves versus commanded X position, one per travel direction"></div>
+      <figcaption><b>Fig 1 — The measured error map.</b> Two curves, one per travel direction. Peak correction ≈ 1.25&nbsp;mm near mid-travel; the two directions differ by a direction-dependent gap. This is the data the filter applies.</figcaption>
+    </figure>
+    <p class="pull">The only thing that actually removes it is a measured map of the error versus position, applied as a direction-aware correction to the toolpath.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">02</span><h2>Diagnosis — is this really your problem?</h2></div>
+    <p>Command a long move one way, measure the real travel; command it back, measure again. On my machine, ±800&nbsp;mm gave:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Direction</th><th>Commanded</th><th>Measured</th><th>Error</th></tr></thead>
+      <tbody>
+        <tr><td>Right (+)</td><td>800 mm</td><td>799.85 mm</td><td class="neg">−0.15 mm</td></tr>
+        <tr><td>Left (−)</td><td>800 mm</td><td>800.02 mm</td><td class="pos">+0.02 mm</td></tr>
+      </tbody>
+      <caption>The +800 / −800 asymmetry test — the fastest way to tell geometry from backlash.</caption>
+    </table></div>
+    <p>Pure <strong>backlash</strong> would show the <em>same</em> absolute offset both ways. A pure <strong>scale error</strong> would be short (or long) by the same proportion both ways. Here the two directions differ in magnitude <em>and</em> sign — the signature of a position- and direction-dependent geometric error.</p>
+    <p>Two more confirmations: cut a test part and see if features are off by amounts that grow and shrink along the axis; and check repeatability — if repeated runs land within hundredths of a millimetre, the error is <em>deterministic</em> and therefore mappable.</p>
+    <div class="note warn"><span class="lab">Order of operations</span><p>First get steps-per-mm / servo E-gear right (removes the constant scale error), <em>then</em> measure the residual map. Map before calibrating scale and the map just absorbs the scale error.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">03</span><h2>Measuring the machine</h2></div>
+    <p>You need an independent length reference over the <strong>full travel</strong>. I used a 1600&nbsp;mm digital linear scale so I could map the whole X axis without moving the scale (moving it introduces stitching errors).</p>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_SETUP}}" alt="Schematic: linear scale mounted parallel to the axis, read-head shuttle bolted to the spindle carriage, home switch, monotonic passes"></div>
+      <figcaption><b>Fig 2 — Measurement setup.</b> Read-head shuttle bolted to the moving carriage; independent scale parallel to travel; fresh home each pass.</figcaption>
+    </figure>
+    <h3>One pass — do it identically every time</h3>
+    <ol>
+      <li><strong>Fresh homing</strong> to a repeatable datum (an inductive switch repeats to ~0.005&nbsp;mm).</li>
+      <li><strong>Back off</strong> a few mm in the direction you're about to map — this takes up the backlash in that direction, so the pass is monotonic and backlash-free.</li>
+      <li><strong>Zero the scale.</strong></li>
+      <li>Command <strong>monotonic incremental steps</strong> across the whole travel (e.g. <code>G91 X20</code> ×76 for 0–1520&nbsp;mm), recording the scale at each node. Never reverse mid-pass.</li>
+      <li>Repeat for the other direction (home, back off the other way, zero, step).</li>
+    </ol>
+    <div class="note"><span class="lab">The far-end datum</span><p>Most controllers home to one side only (UCCNC has no far-side homing), so the reverse passes need a repeatable far-end datum. A short custom macro does it: jog into the far sensor (finish in ~0.01&nbsp;mm steps), read the scale at contact, then back off by the amount that lands you on your reference — e.g. the scale read 1530.11&nbsp;mm at the sensor, so a 10.11&nbsp;mm back-off sits at 1520. What matters is that it <em>repeats</em> (mine held ±0.005&nbsp;mm), not the exact number: the filter normalizes each map, so a constant datum offset cancels — but a datum that drifts pass-to-pass corrupts the median.</p></div>
+    <p>Do <strong>several passes per direction</strong> (I did 5 each) and take the <strong>median</strong> per node. My pass-to-pass repeatability was ~0.05&nbsp;mm with 0.97+ shape correlation — highly deterministic. Your correction is only as good as your repeatability; ~0.05&nbsp;mm repeatability is the accuracy floor.</p>
+    <div class="note stop"><span class="lab">Keep backlash out</span><p>Monotonic single-direction passes make the maps <em>geometry only</em>, no backlash. Backlash is compensated separately (§6). Never mix the two — that double-counts.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">04</span><h2>Building the maps</h2></div>
+    <p>One CSV per axis, same layout:</p>
+    <pre><code>commanded_mm, error_pos_mm, correction_pos_mm, error_neg_mm, correction_neg_mm</code></pre>
+    <p><code>pos</code> = increasing coordinate (X right, Y forward, Z up); <code>neg</code> = decreasing. <code>error</code> is (measured − commanded); <code>correction = −error</code>, applied as <code>out = commanded + correction</code> with linear interpolation between nodes and linear extrapolation beyond the ends.</p>
+    <p><strong>Normalization matters.</strong> The two directional curves are usually zeroed at different physical points, so their ends don't meet. For cutting this is irrelevant — G54 absorbs a constant shift — but the tool must not move your origin, so it normalizes each map to <code>correction(work_zero)=0</code>. You just give it the anchor (usually 0).</p>
+    <p>Requirements are minimal: at least 2 nodes, strictly ascending and unique. Step is free, may differ per axis, and may be non-uniform. The tool validates on load and names the offending row if you fat-finger the CSV.</p>
+    <div class="note"><span class="lab">You don't hand-write the CSV</span><p>A built-in <strong>map builder</strong> reads your measurement spreadsheet (<code>.xlsx</code> or <code>.csv</code>) directly — no Excel or extra libraries — computes <code>error = measured − commanded</code>, takes the <strong>median across passes</strong> per node, and writes the map, optionally loading it straight into an axis. Record scale readings in the provided template and click Generate.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">05</span><h2>How the software solves it</h2></div>
+    <p>Adding the map value to each coordinate is the easy part. Three things need care.</p>
+    <h3>A · Arcs become short lines</h3>
+    <p>Offset an arc's start and end by <em>different</em> amounts and its radius no longer matches its endpoints — many controllers reject or distort it. So each <code>G2/G3</code> becomes a <strong>polyline of short <code>G1</code> segments</strong>, each corrected independently. Splitting uses a fixed <strong>chord tolerance</strong> (default 0.015&nbsp;mm — ten times finer than repeatability), with a 0.3&nbsp;mm minimum segment so look-ahead never chokes.</p>
+    <h3>B · Picking the right curve</h3>
+    <p>The curve is chosen by the sign of the move's ΔX/ΔY/ΔZ. Near features parallel to another axis, ΔX jitters around zero — so a small <strong>dead-band</strong> (0.3&nbsp;mm) holds the active direction until a genuine reversal exceeds it. No chatter.</p>
+    <h3>C · Backlash — optional, separate</h3>
+    <p>If you compensate backlash in software, the tool adds a per-direction offset (two values per axis) on top of the map. It's bounded and doesn't drift. <strong>Compensate backlash either here or in your controller, never both.</strong></p>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_OVERLAY}}" alt="Toolpath of a real part, before and after correction, nearly identical"></div>
+      <figcaption><b>Fig 3 — Before vs after on a real part (1398 arcs).</b> The corrected path (red) tracks the commanded path (blue): geometry preserved, shifted by ≤~1.2&nbsp;mm where the map calls for it. No distortion.</figcaption>
+    </figure>
+    <p>Everything else is preserved: absolute mode only; feeds, speeds, comments and the start/end blocks copied verbatim; Z bit-for-bit untouched unless you enable Z. Every run ends with an <strong>automatic self-check</strong> that independently verifies untouched axes, sane correction magnitudes, chord tolerance, and structure — and refuses the output if anything looks wrong.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">06</span><h2>Using it</h2></div>
+    <p>A single Windows executable — no install, no Python. Pick the input <code>.TAP</code>, tick the axis/axes to correct, choose a map CSV and (optionally) backlash values per axis, hit <strong>Filter</strong>. The log shows exactly what happened and the self-check result.</p>
+    <p>A <strong>single-move helper</strong> gives the corrected number for a manual MDI move: enter <em>From</em> (current) and <em>To</em> (target) and read the value to type in — in <em>independent</em> mode (geometry only) or <em>sequential</em> mode (adds backlash on reversal, chains moves). Maps are external CSVs — remeasure, drop in new files, no rebuild. That's what makes it machine- and CAM-agnostic.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">07</span><h2>Results &amp; validation</h2></div>
+    <p>Expect the residual to fall to roughly your machine's <strong>repeatability</strong> — on mine, ~0.03–0.05&nbsp;mm p95, down from a ~1.2&nbsp;mm peak. Validate in three cheap stages:</p>
+    <ol>
+      <li><strong>On the bench:</strong> overlay before/after (geometry preserved, shifted smoothly by tenths of a mm); spot-check a coordinate against the CSV; confirm Z untouched. The self-check does most of this automatically.</li>
+      <li><strong>On the machine, no cutting:</strong> command a corrected move and read it back with the <em>same</em> scale you mapped with — it should land closer to nominal. This closes the loop with one reference; the most direct proof.</li>
+      <li><strong>A real cut, A/B:</strong> cut a calibration piece with the filter OFF and ON, measure both against the drawing. The difference is your gain.</li>
+    </ol>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">08</span><h2>Scope &amp; limits</h2></div>
+    <ul>
+      <li><strong>Repeatability is the floor.</strong> If the machine doesn't repeat, mapping won't save you — fix the mechanics first.</li>
+      <li><strong>Static map.</strong> It doesn't adapt to load, temperature or wear in real time. Remeasure occasionally.</li>
+      <li><strong>Don't double-compensate.</strong> Backlash goes in the tool <em>or</em> the controller; and don't add a linear correction if you've already fixed steps-per-mm.</li>
+    </ul>
+    <div class="note stop"><span class="lab">Verify before cutting</span><p>It rewrites G-code; a bad map or wrong setting can move the tool. Dry-run first. The self-check catches structural mistakes — not a wrong measurement.</p></div>
+  </div>
+</article>
+
+<!-- ============================= BULGARIAN ============================= -->
+<article class="lang-bg">
+  <div class="col">
+    <p class="lead">Калибрирал си стъпките на милиметър. Настроил си backlash компенсацията. Homing-ът повтаря отлично. И въпреки това 800&nbsp;мм елемент излиза 799.8, 1100&nbsp;мм — 1101.2, а отвор, който трябва да е идеално кръгъл, е леко яйцевиден.</p>
+    <p>Грешката не е постоянна, не е пропорционална на разстоянието и сякаш се мени според това накъде се е движила оста. Това е <strong>нелинейна, позиционно-зависима грешка</strong> — тя стои под backlash-а и под грешката на мащаба и тихо ограничава точността на огромен брой любителски и полупрофесионални машини, особено рейка-пиньон гентри.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">01</span><h2>Проблемът, за който никой не говори</h2></div>
+    <p>Идва от съвсем реални физически неща: рейка, която не е идеално права или успоредна на водачите (дълбочината на захапката се мени, значи ефективният радиус на пиньона се мени); биене на пиньона и вълна веднъж на оборот; разцентроване на гентрито, огъване на рамата, термичен дрейф; геометрия на редуктора.</p>
+    <p>Картографирана по един 1.5&nbsp;м ход, тя обикновено изглежда като <strong>плавна дъга плюс дребна периодична вълна</strong>. Три свойства я правят коварна:</p>
+    <ul>
+      <li><strong>Не е линейна.</strong> Стъпки-на-мм (или servo E-gear) оправят само постоянен мащаб. След това дъгата остава.</li>
+      <li><strong>Не е backlash.</strong> Backlash-ът е загубено движение <em>при обръщане</em>. Тази грешка присъства и при монотонно движение и се мени с <em>позицията</em>.</li>
+      <li><strong>Често е посочно-зависима.</strong> Отляво-надясно и отдясно-наляво описват <em>различни</em> криви — при мен до ~0.9&nbsp;мм разлика.</li>
+    </ul>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_MAP}}" alt="Две криви на корекцията спрямо командната позиция X, по една за всяка посока"></div>
+      <figcaption><b>Фиг. 1 — Измерената карта на грешката.</b> Две криви, по една на посока. Връх на корекцията ≈ 1.25&nbsp;мм по средата на хода; двете посоки се различават с посочно-зависима разлика. Това са данните, които филтърът прилага.</figcaption>
+    </figure>
+    <p class="pull">Единственото, което наистина я премахва, е измерена карта на грешката спрямо позицията, приложена като посочно-зависима корекция на траекторията.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">02</span><h2>Диагностика — това ли е твоят проблем?</h2></div>
+    <p>Командвай дълъг ход в едната посока, измери реалния ход; върни го, измери пак. При мен ±800&nbsp;мм даде:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Посока</th><th>Команда</th><th>Измерено</th><th>Грешка</th></tr></thead>
+      <tbody>
+        <tr><td>Надясно (+)</td><td>800 мм</td><td>799.85 мм</td><td class="neg">−0.15 мм</td></tr>
+        <tr><td>Наляво (−)</td><td>800 мм</td><td>800.02 мм</td><td class="pos">+0.02 мм</td></tr>
+      </tbody>
+      <caption>Тестът +800 / −800 — най-бързият начин да отличиш геометрия от луфт.</caption>
+    </table></div>
+    <p>Чист <strong>backlash</strong> би дал <em>еднакъв</em> абсолютен офсет и в двете посоки. Чиста <strong>мащабна грешка</strong> — къс (или дълъг) с еднакъв процент и в двете. Тук двете посоки се различават и по големина, <em>и</em> по знак — подписът на позиционно- и посочно-зависима геометрична грешка.</p>
+    <p>Още две потвърждения: изрежи тестов детайл и виж дали елементите са отклонени с величини, които растат и намаляват по оста; и провери повторяемостта — ако пробезите попадат в стотни от милиметъра, грешката е <em>детерминистична</em> и следователно картографируема.</p>
+    <div class="note warn"><span class="lab">Ред на действията</span><p>Първо оправи стъпки-на-мм / servo E-gear (маха постоянната мащабна грешка), <em>после</em> измери остатъчната карта. Картографирай преди мащаба и картата просто ще погълне мащабната грешка.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">03</span><h2>Измерване на машината</h2></div>
+    <p>Нужен ти е независим еталон за дължина по <strong>целия ход</strong>. Аз ползвах 1600&nbsp;мм цифрова линейна скала, за да картографирам цялата ос X без да мърдам скалата (преместването ѝ внася грешки от снаждане).</p>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_SETUP}}" alt="Схема: линейна скала успоредно на оста, каретка с четяща глава към шпиндела, home датчик, монотонни пробези"></div>
+      <figcaption><b>Фиг. 2 — Setup за измерване.</b> Каретката с четящата глава е закрепена към подвижния възел; независима скала успоредно на хода; свеж homing на всеки пробег.</figcaption>
+    </figure>
+    <h3>Един пробег — прави го идентично всеки път</h3>
+    <ol>
+      <li><strong>Свеж homing</strong> към повторяема отправна точка (индуктивен датчик повтаря на ~0.005&nbsp;мм).</li>
+      <li><strong>Отдръпни се</strong> няколко мм в посоката, която ще картографираш — това обира луфта в тази посока, значи пробегът е монотонен и без backlash.</li>
+      <li><strong>Нулирай скалата.</strong></li>
+      <li>Командвай <strong>монотонни инкрементални стъпки</strong> по целия ход (напр. <code>G91 X20</code> ×76 за 0–1520&nbsp;мм), записвайки скалата на всеки възел. Никога не обръщай посоката по време на пробег.</li>
+      <li>Повтори за другата посока (homing, отдръпване в другата посока, нулиране, стъпки).</li>
+    </ol>
+    <div class="note"><span class="lab">Датумът в далечния край</span><p>Повечето контролери правят homing само от едната страна (UCCNC няма от далечния край), затова обратните пробези искат повторяема отправна точка там. Кратък custom макрос я дава: вкарваш до далечния датчик (финиш на стъпки ~0.01&nbsp;mm), четеш скалата при контакт, после се отдръпваш толкова, че да си на референцията — напр. скалата показа 1530.11&nbsp;mm при датчика, значи backoff 10.11&nbsp;mm те слага на 1520. Важна е <em>повторяемостта</em> (при мен ±0.005&nbsp;mm), не точното число: филтърът нормализира всяка карта, така че постоянно отместване се съкращава — но датум, който броди между пробезите, разваля медианата.</p></div>
+    <p>Направи <strong>по няколко пробега на посока</strong> (аз — по 5) и вземи <strong>медианата</strong> на всеки възел. Моята повторяемост беше ~0.05&nbsp;мм при 0.97+ корелация на формата — силно детерминистична. Корекцията е добра само колкото повторяемостта; ~0.05&nbsp;мм е таванът на точността.</p>
+    <div class="note stop"><span class="lab">Пази backlash-а извън картата</span><p>Монотонните еднопосочни пробези правят картите <em>само геометрия</em>, без луфт. Backlash-ът се компенсира отделно (§6). Никога не смесвай двете — иначе се брои двойно.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">04</span><h2>Създаване на картите</h2></div>
+    <p>По един CSV на ос, същ формат:</p>
+    <pre><code>commanded_mm, error_pos_mm, correction_pos_mm, error_neg_mm, correction_neg_mm</code></pre>
+    <p><code>pos</code> = посоката на нарастване (X надясно, Y напред, Z нагоре); <code>neg</code> = намаляване. <code>error</code> е (измерено − командвано); <code>correction = −error</code>, прилага се като <code>изход = команда + correction</code> с линейна интерполация между възлите и линейна екстраполация извън краищата.</p>
+    <p><strong>Нормализацията е важна.</strong> Двете посочни криви обикновено са нулирани в различни физически точки, затова краищата им не съвпадат. За рязане е без значение — G54 поглъща постоянно отместване — но инструментът не бива да мести началото ти, затова нормализира всяка карта до <code>correction(работна_нула)=0</code>. Ти само задаваш анкера (обикновено 0).</p>
+    <p>Изискванията са минимални: поне 2 възела, строго растящи и уникални. Стъпката е свободна, може да е различна за всяка ос и неравномерна. Инструментът валидира при зареждане и посочва грешния ред, ако сбъркаш CSV-то.</p>
+    <div class="note"><span class="lab">Не пишеш CSV-то на ръка</span><p>Вграден <strong>map builder</strong> чете измервателната ти таблица (<code>.xlsx</code> или <code>.csv</code>) директно — без Excel и без библиотеки — смята <code>error = мерено − командвано</code>, взима <strong>медианата по пробези</strong> за всеки възел и записва картата, като по избор я зарежда направо в ос. Записваш показанията в готовия шаблон и натискаш Generate.</p></div>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">05</span><h2>Как софтуерът решава проблема</h2></div>
+    <p>Добавянето на стойността от картата към всяка координата е лесната част. Три неща изискват внимание.</p>
+    <h3>A · Дъгите стават къси прави</h3>
+    <p>Отмести началото и края на дъга с <em>различни</em> величини и радиусът вече не съвпада с краищата — много контролери я отхвърлят или изкривяват. Затова всяко <code>G2/G3</code> става <strong>полилиния от къси <code>G1</code> сегменти</strong>, всеки коригиран самостоятелно. Разбиването е по фиксирана <strong>хордова толерантност</strong> (default 0.015&nbsp;мм — десет пъти по-фино от повторяемостта), с минимален сегмент 0.3&nbsp;мм, за да не задави look-ahead-а.</p>
+    <h3>B · Избор на правилната крива</h3>
+    <p>Кривата се избира по знака на ΔX/ΔY/ΔZ. Около елементи, успоредни на друга ос, ΔX трепти около нулата — затова малка <strong>мъртва зона</strong> (0.3&nbsp;мм) задържа активната посока, докато истински реверс не я надхвърли. Без трептене.</p>
+    <h3>C · Backlash — по избор, отделно</h3>
+    <p>Ако компенсираш луфт софтуерно, инструментът добавя посочен офсет (две стойности на ос) върху картата. Ограничен е и не дрейфа. <strong>Компенсирай луфта или тук, или в контролера, никога и в двете.</strong></p>
+    <figure class="bleed">
+      <div class="plate"><img src="{{FIG_OVERLAY}}" alt="Траектория на реален детайл, преди и след корекция, почти идентични"></div>
+      <figcaption><b>Фиг. 3 — Преди и след на реален детайл (1398 дъги).</b> Коригираната траектория (червено) следва командната (синьо): геометрията е запазена, отместена с ≤~1.2&nbsp;мм там, където картата го иска. Без изкривяване.</figcaption>
+    </figure>
+    <p>Всичко останало се запазва: само абсолютен режим; подавания, обороти, коментари и начален/краен блок — дословно; Z е бит-в-бит непокътнат, освен ако не включиш Z. Всеки пуск завършва с <strong>автоматична проверка (self-check)</strong>, която независимо потвърждава некоригираните оси, разумните величини, хордовата толерантност и структурата — и отказва изхода, ако нещо не е наред.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">06</span><h2>Употреба</h2></div>
+    <p>Един Windows изпълним файл — без инсталация, без Python. Избери входния <code>.TAP</code>, чекни оста/осите, избери карта CSV и (по избор) backlash стойности на ос, натисни <strong>Filter</strong>. Логът показва какво точно е станало и резултата от self-check.</p>
+    <p><strong>Калкулатор за единичен ход</strong> дава коригираното число за ръчен MDI ход: въведи <em>From</em> (текуща) и <em>To</em> (цел) и прочети стойността — в <em>независим</em> режим (само геометрия) или <em>последователен</em> (добавя backlash при реверс, верижни ходове). Картите са външни CSV — преизмерваш, пускаш нови файлове, без пребилд. Точно това го прави машинно- и CAM-агностичен.</p>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">07</span><h2>Резултати и валидация</h2></div>
+    <p>Очаквай остатъкът да падне до около <strong>повторяемостта</strong> на машината — при мен ~0.03–0.05&nbsp;мм p95, от ~1.2&nbsp;мм връх. Валидирай на три евтини нива:</p>
+    <ol>
+      <li><strong>На бюрото:</strong> наложи преди/след (геометрията запазена, отместена гладко с десети от мм); провери координата спрямо CSV; потвърди, че Z е непокътнат. Self-check прави повечето автоматично.</li>
+      <li><strong>На машината, без рязане:</strong> командвай коригиран ход и го отчети със <em>същата</em> скала, с която картографира — трябва да попадне по-близо до номинала. Затваря контура с един еталон; най-прякото доказателство.</li>
+      <li><strong>Реален рез, A/B:</strong> изрежи калибровъчен детайл с филтъра ИЗКЛ и ВКЛ, измери и двата спрямо чертежа. Разликата е печалбата ти.</li>
+    </ol>
+  </div>
+
+  <div class="col">
+    <div class="sec-head"><span class="k">08</span><h2>Обхват и ограничения</h2></div>
+    <ul>
+      <li><strong>Повторяемостта е таванът.</strong> Ако машината не повтаря, картата няма да те спаси — първо оправи механиката.</li>
+      <li><strong>Статична карта.</strong> Не се адаптира към натоварване, температура или износване в реално време. Преизмервай от време на време.</li>
+      <li><strong>Не компенсирай двойно.</strong> Backlash-ът влиза в инструмента <em>или</em> в контролера; и не добавяй линейна корекция, ако вече си оправил стъпки-на-мм.</li>
+    </ul>
+    <div class="note stop"><span class="lab">Проверявай преди рязане</span><p>Инструментът пренаписва G-код; лоша карта или грешна настройка може да мръдне инструмента. Първо dry-run. Self-check хваща структурни грешки — не грешно измерване.</p></div>
+  </div>
+</article>
+
+<footer>
+  <div class="col">
+    <div class="eyebrow lang-en" style="color:var(--amber)">Download &amp; license</div>
+    <div class="eyebrow lang-bg" style="color:var(--amber)">Сваляне и лиценз</div>
+    <p class="lang-en" style="margin-top:12px"><strong>StratoXFilter</strong> is free and open source under the <strong>MIT license</strong> — use it, modify it, redistribute it; keep the notice. No warranty; CNC is dangerous, verify before you cut. For a new machine you only do the measurement work, build the maps, and load them — the engine is already generic across X, Y and Z and independent of your CAM and controller.</p>
+    <p class="lang-bg" style="margin-top:12px"><strong>StratoXFilter</strong> е безплатен и с отворен код под <strong>MIT лиценз</strong> — ползвай го, променяй го, разпространявай го; запази бележката. Без гаранция; CNC е опасно, проверявай преди да режеш. За нова машина само правиш измерването, строиш картите и ги зареждаш — ядрото вече е общо за X, Y и Z и независимо от твоя CAM и контролер.</p>
+    <div class="cta">
+      <span class="pill key">MIT</span>
+      <span class="pill">Windows · single .exe</span>
+      <span class="pill">X · Y · Z</span>
+      <span class="pill">Python 3 source</span>
+    </div>
+    <p class="foot-note lang-en">© 2026 Ivan Topurov · Questions, results and improvements welcome — that's the point of releasing it.</p>
+    <p class="foot-note lang-bg">© 2026 Ivan Topurov · Въпроси, резултати и подобрения са добре дошли — това е смисълът да го пусна свободно.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var body=document.body, en=document.getElementById('en'), bg=document.getElementById('bg');
+  function setLang(l){ body.dataset.lang=l; en.setAttribute('aria-pressed',l==='en'); bg.setAttribute('aria-pressed',l==='bg'); }
+  en.addEventListener('click',function(){setLang('en')});
+  bg.addEventListener('click',function(){setLang('bg')});
+  setLang('en');
+  var t=document.getElementById('theme'), root=document.documentElement;
+  t.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme');
+    if(!cur){ cur = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light'; }
+    root.setAttribute('data-theme', cur==='dark'?'light':'dark');
+  });
+})();
+</script>

@@ -1,0 +1,56 @@
+========================================================================
+ FORUM POST — BBCode teaser (short). Paste into the forum, then fill in:
+   [ARTICLE_URL]  = link to the full article (your published HTML page)
+   [DOWNLOAD_URL] = link to the .exe / repo (e.g. GitHub release)
+   [IMG_URL]      = URL of fig_map.png after you upload it (or use the
+                    forum's own "attach image" button instead of [img])
+========================================================================
+
+
+======================== ENGLISH VERSION ==============================
+
+[b][size=150]Free tool: cancel your CNC's hidden nonlinear positioning error (measure → map → correct the G-code)[/size][/b]
+
+You calibrated steps-per-mm. You set backlash comp. Homing repeats fine. And yet an 800&nbsp;mm feature comes out 799.8, an 1100&nbsp;mm one comes out 1101.2, and a "round" bore is slightly egg-shaped.
+
+That's [b]nonlinear, position-dependent[/b] error — a smooth arch of geometric error along the axis (rack/mesh, pinion, rail alignment). It is [b]not backlash[/b] and [b]not[/b] a steps-per-mm error, so neither of those fixes it. On rack-and-pinion gantries it's often [b]different in each direction[/b] too.
+
+[img][IMG_URL][/img]
+[i]The measured error map — two curves, one per travel direction. Peak ~1.25&nbsp;mm here.[/i]
+
+I wrote a small, free tool ([b]StratoXFilter[/b], MIT) that fixes it in software: it warps the G-code against a measured error map, per direction, on X/Y/Z. It also splits arcs into short lines (so corrected arcs don't break the controller), has optional backlash comp, a single-move MDI helper, and an automatic self-check on every run. A built-in [b]map builder[/b] turns your Excel/CSV measurement table straight into the map (median across passes) — no hand-editing. Input is a .TAP/G-code file; output is a corrected file for your controller. Machine- and CAM-agnostic — you just measure your machine and load the map.
+
+[b]Full write-up[/b] (problem → how to measure with a linear scale → building the maps → results): [url=[ARTICLE_URL]]read here[/url]
+[b]Download / source[/b] (Windows .exe + Python): [url=[DOWNLOAD_URL]]here[/url]
+
+Verify with a dry run before cutting — it rewrites G-code. Questions, results and improvements welcome.
+
+
+======================== BULGARIAN VERSION ============================
+
+[b][size=150]Безплатен инструмент: премахни скритата нелинейна позиционна грешка на CNC-то (измери → картографирай → коригирай G-кода)[/size][/b]
+
+Калибрирал си стъпки-на-мм. Настроил си backlash. Homing-ът повтаря. И пак — 800&nbsp;мм елемент излиза 799.8, 1100&nbsp;мм излиза 1101.2, а "кръгъл" отвор е леко яйцевиден.
+
+Това е [b]нелинейна, позиционно-зависима[/b] грешка — плавна дъга от геометрична грешка по оста (рейка/захапка, пиньон, центровка на водачите). [b]Не е backlash[/b] и [b]не е[/b] грешка на стъпки-на-мм, затова нито едното не я оправя. При рейка-пиньон гентри често е и [b]различна в двете посоки[/b].
+
+[img][IMG_URL][/img]
+[i]Измерената карта на грешката — две криви, по една на посока. Връх ~1.25&nbsp;мм тук.[/i]
+
+Написах малък, безплатен инструмент ([b]StratoXFilter[/b], MIT), който я оправя софтуерно: изкривява G-кода спрямо измерена карта, по посока, за X/Y/Z. Разбива и дъгите на къси прави (за да не чупят коригираните дъги контролера), има опционален backlash, калкулатор за единичен MDI ход и автоматична проверка на всеки пуск. Вграден [b]map builder[/b] превръща Excel/CSV таблицата ти с измервания директно в картата (медиана по пробези) — без ръчно писане. Входът е .TAP/G-code файл; изходът е коригиран файл за контролера. Машинно- и CAM-агностичен — само измерваш машината и зареждаш картата.
+
+[b]Пълна статия[/b] (проблем → как да мериш с линейна скала → създаване на картите → резултати): [url=[ARTICLE_URL]]прочети тук[/url]
+[b]Сваляне / код[/b] (Windows .exe + Python): [url=[DOWNLOAD_URL]]тук[/url]
+
+Проверявай с dry run преди рязане — инструментът пренаписва G-код. Въпроси, резултати и подобрения са добре дошли.
+
+
+========================================================================
+ NOTES
+ - Some forums use [size=6] instead of [size=150]; adjust if the title
+   looks wrong. If [img] is not allowed, use the forum's attach/upload
+   button and drop the [img] line.
+ - &nbsp; keeps the number and unit together; if your forum shows it
+   literally, just replace "&nbsp;" with a normal space.
+ - Keep the safety line — forum mods and readers appreciate it.
+========================================================================
