@@ -52,7 +52,3 @@ desktop.ini
 # its history clean). If you go that route, remove the leading "# " on the
 # next line to start ignoring the build folder:
 # dist/
-
-# --- Machine-description PDF: excluded by default (copyright caution) ---
-# If this document is your OWN and you want it public, delete the next line.
-Описание на машината/
